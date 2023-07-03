@@ -1,0 +1,98 @@
+tGET \"Get\"
+tSET \"Set\"
+tFUNCTION \"Function\"
+tPRINT \"Print\"
+tFOR \"For\"
+tIF \"If\"
+tRETURN \"Return\"
+tCOMMA ,
+tPLUS \"\+\"
+tMUL \"\*\"
+tINC \"\++\"
+tLBRAC \[
+tGT \"\>\"
+tGEQ \"\>=\"
+tEQUALITY \"\==\"
+tMINUS \"\-\"
+tDIV \"\/\"
+tDEC \"\--\"
+tRBRAC \]
+tLT \"\<\"
+tLEQ \"\<=\"
+tIDENT \"[a-zA-Z_][a-zA-Z0-9_]*\"
+tNUM [\-]?[0-9]+(\.[0-9]+)?
+tSTRING \'(\'\'|[^\'])*\'
+
+%{
+#include <stdio.h>
+#include <stdbool.h>
+int noLines=1;
+%}
+
+
+%%
+
+{tGET} printf("%d tGET\n",noLines);
+{tSET} printf("%d tSET\n",noLines);
+{tFUNCTION} printf("%d tFUNCTION\n",noLines);
+{tPRINT} printf("%d tPRINT\n",noLines);
+{tFOR} printf("%d tFOR\n",noLines);
+{tIF} printf("%d tIF\n",noLines);
+{tRETURN} printf("%d tRETURN\n",noLines);
+{tCOMMA} printf("%d tCOMMA\n",noLines);
+{tPLUS} printf("%d tPLUS\n",noLines);
+{tMUL} printf("%d tMUL\n",noLines);
+{tINC} printf("%d tINC\n",noLines);
+{tLBRAC} printf("%d tLBRAC\n",noLines);
+{tGT} printf("%d tGT\n",noLines);
+{tGEQ} printf("%d tGEQ\n",noLines);
+{tEQUALITY} printf("%d tEQUALITY\n",noLines);
+{tMINUS} printf("%d tMINUS\n",noLines);
+{tDIV} printf("%d tDIV\n",noLines);
+{tDEC} printf("%d tDEC\n",noLines);
+{tRBRAC} printf("%d tRBRAC\n",noLines);
+{tLT} printf("%d tLT\n",noLines);
+{tLEQ} printf("%d tLEQ\n",noLines);
+{tIDENT} printf("%d tIDENT (%.*s)\n",noLines,yyleng - 2, yytext + 1);
+{tNUM} {
+if(strchr(yytext,'.') != NULL){
+char *p =strchr(yytext,'.');
+p++;
+bool allZero=true;
+while(*p!='\0'){
+if (*p!='0'){
+	allZero=false;
+ 	break;
+}
+p++;
+}
+if(!allZero){printf("%d tNUM (%s) (%g)\n",noLines,yytext,atof(yytext));}
+
+else{printf("%d tNUM (%s) (%.1f)\n",noLines,yytext,atof(yytext));}
+}
+else{
+printf("%d tNUM (%s) (%g)\n",noLines, yytext, atof(yytext));
+}
+}
+
+{tSTRING} {
+printf("%d tSTRING (%.*s)\n",noLines,yyleng-2,yytext+1);
+int i;
+for (i=1; i<yyleng-1;i++){
+	if(yytext[i]=='\n'){
+		noLines++;
+	}
+}
+}
+
+\n noLines++;
+" " ;
+\t ;
+. printf("%d ILLEGAL CHARACTER (%s)\n",noLines,yytext); 
+
+%%
+int main(){
+yylex();
+return (0);
+}
+
